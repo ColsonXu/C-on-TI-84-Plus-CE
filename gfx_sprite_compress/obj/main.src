@@ -1,0 +1,162 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -nomodsect -optspeed -noreduceopt -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"..\SRC\MAIN.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	/* Keep these headers */
+;    2	#include <stdbool.h>
+;    3	#include <stddef.h>
+;    4	#include <stdint.h>
+;    5	#include <tice.h>
+;    6	
+;    7	/* Standard headers - it's recommended to leave them included */
+;    8	#include <math.h>
+;    9	#include <stdio.h>
+;   10	#include <stdlib.h>
+;   11	#include <string.h>
+;   12	
+;   13	/* Decompression functions */
+;   14	#include <decompress.h>
+;   15	
+;   16	/* Shared libraries */
+;   17	#include <graphx.h>
+;   18	#include "gfx/all_gfx.h"
+;   19	
+;   20	/* Put all your code here */
+;   21	void main(void) {
+_main:
+	LD	HL,-3
+	CALL	__frameset
+;   22	    /* Define our sprite */
+;   23	    gfx_image_t *apple;
+;   24	    
+;   25	    /* This is just here so that the malloc function is compiled into the binary */
+;   26	    malloc(0);
+	LD	BC,0
+	PUSH	BC
+	CALL	_malloc
+	POP	BC
+;   27	    
+;   28	    /* Allocate space for the decompressed sprite */
+;   29	    apple = gfx_MallocSprite( 220, 240 );
+	LD	BC,_malloc
+	PUSH	BC
+	LD	BC,240
+	PUSH	BC
+	LD	BC,220
+	PUSH	BC
+	CALL	_gfx_AllocSprite
+	POP	BC
+	POP	BC
+	POP	BC
+	LD	(IX+-3),HL
+;   30	    
+;   31	    /* Decompress the sprite */
+;   32	    dzx7_Standard( apple_compressed, apple ); // or dzx7_Turbo
+	LD	BC,HL
+	PUSH	BC
+	LD	BC,_apple_compressed
+	PUSH	BC
+	CALL	_dzx7_Standard
+	POP	BC
+	POP	BC
+;   33	    
+;   34	    /* Initialize the 8bpp graphics */
+;   35	    gfx_Begin( gfx_8bpp );
+	LD	BC,39
+	PUSH	BC
+	CALL	_gfx_Begin
+	POP	BC
+;   36	    
+;   37	    /* Set up the palette */
+;   38	    gfx_SetPalette( all_gfx_pal, sizeof(all_gfx_pal), 0 );
+	LD	BC,0
+	PUSH	BC
+	LD	BC,508
+	PUSH	BC
+	LD	BC,_all_gfx_pal
+	PUSH	BC
+	CALL	_gfx_SetPalette
+	POP	BC
+	POP	BC
+	POP	BC
+;   39	    gfx_FillScreen( 0x00 );
+	LD	BC,0
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;   40	    
+;   41	    /* Draw the decompressed sprite */
+;   42	    gfx_Sprite( apple, 0, 0);
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_gfx_Sprite
+	POP	BC
+	POP	BC
+	POP	BC
+;   43	    
+;   44	    /* Wait for a key */
+;   45	    while( !os_GetCSC() );
+L_1:
+	CALL	_os_GetCSC
+	OR	A,A
+	JR	Z,L_1
+;   46	    
+;   47	    /* Please, don't forget to free the apple image memory :) */
+;   48	    free(apple);
+	LD	BC,(IX+-3)
+	PUSH	BC
+	CALL	_free
+	POP	BC
+;   49	    
+;   50	    gfx_End();
+	CALL	_gfx_End
+;   51	    prgm_CleanUp();
+	CALL	_prgm_CleanUp
+	LD	SP,IX
+	POP	IX
+	RET	
+
+
+;**************************** _main ***************************
+;Name                         Addr/Register   Size   Type
+;_prgm_CleanUp                       IMPORT  -----   function
+;_gfx_End                            IMPORT  -----   function
+;_free                               IMPORT  -----   function
+;_os_GetCSC                          IMPORT  -----   function
+;_gfx_Sprite                         IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
+;_all_gfx_pal                        IMPORT    508   variable
+;_gfx_SetPalette                     IMPORT  -----   function
+;_gfx_Begin                          IMPORT  -----   function
+;_apple_compressed                   IMPORT  11495   variable
+;_dzx7_Standard                      IMPORT  -----   function
+;_gfx_AllocSprite                    IMPORT  -----   function
+;_malloc                             IMPORT  -----   function
+;apple                                 IX-3      3   variable
+
+
+; Stack Frame Size: 9 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	XREF _all_gfx_pal:ROM
+	XREF _apple_compressed:ROM
+	XREF _gfx_Sprite:ROM
+	XREF _gfx_FillScreen:ROM
+	XREF _gfx_SetPalette:ROM
+	XREF _gfx_End:ROM
+	XREF _gfx_Begin:ROM
+	XREF _gfx_AllocSprite:ROM
+	XREF _dzx7_Standard:ROM
+	XREF _free:ROM
+	XREF _malloc:ROM
+	XREF _os_GetCSC:ROM
+	XREF _prgm_CleanUp:ROM
+	XREF __frameset:ROM
+	XDEF _main
+	END

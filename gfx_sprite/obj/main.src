@@ -1,0 +1,113 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -nomodsect -optspeed -noreduceopt -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"..\SRC\MAIN.C"
+	.assume ADL=1
+	SEGMENT CODE
+;    1	/* Keep these headers */
+;    2	#include <stdbool.h>
+;    3	#include <stddef.h>
+;    4	#include <stdint.h>
+;    5	#include <tice.h>
+;    6	
+;    7	/* Standard headers - it's recommended to leave them included */
+;    8	#include <math.h>
+;    9	#include <stdio.h>
+;   10	#include <stdlib.h>
+;   11	#include <string.h>
+;   12	
+;   13	/* Shared libraries */
+;   14	#include <graphx.h>
+;   15	
+;   16	/* Include the sprite data */
+;   17	#include "gfx/logo_gfx.h"
+;   18	
+;   19	/* Put function prototypes here */
+;   20	
+;   21	/* Put all your code here */
+;   22	void main(void) {
+_main:
+;   23	    /* Initialize the 8bpp graphics */
+;   24	    gfx_Begin( gfx_8bpp );
+	LD	BC,39
+	PUSH	BC
+	CALL	_gfx_Begin
+	POP	BC
+;   25	    
+;   26	    /* Set up the palette for our sprites */
+;   27	    gfx_SetPalette( logo_gfx_pal, sizeof(logo_gfx_pal), 0);
+	LD	BC,0
+	PUSH	BC
+	LD	BC,490
+	PUSH	BC
+	LD	BC,_logo_gfx_pal
+	PUSH	BC
+	CALL	_gfx_SetPalette
+	POP	BC
+	POP	BC
+	POP	BC
+;   28	    
+;   29	    /* Fill the screen with color index 0 */
+;   30	    gfx_FillScreen( 0 );
+	LD	BC,0
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
+;   31	
+;   32	    /* Draw a bunch of different styled sprites on the screen */
+;   33	    
+;   34	    gfx_TransparentSprite_NoClip( ubuntu, 96, 96 );
+	LD	BC,96
+	PUSH	BC
+	PUSH	BC
+	LD	BC,_ubuntu_data
+	PUSH	BC
+	CALL	_gfx_TransparentSprite_NoClip
+	POP	BC
+	POP	BC
+	POP	BC
+;   35	    
+;   36	    /* Wait for a key to be pressed */
+;   37	    while( !os_GetCSC() );
+L_1:
+	CALL	_os_GetCSC
+	OR	A,A
+	JR	Z,L_1
+;   38	    
+;   39	    /* Close the graphics and return to the OS */
+;   40	    gfx_End();
+	CALL	_gfx_End
+;   41	    prgm_CleanUp();
+	CALL	_prgm_CleanUp
+;   42	}
+	RET	
+
+
+;**************************** _main ***************************
+;Name                         Addr/Register   Size   Type
+;_prgm_CleanUp                       IMPORT  -----   function
+;_gfx_End                            IMPORT  -----   function
+;_os_GetCSC                          IMPORT  -----   function
+;_ubuntu_data                        IMPORT  10002   variable
+;_gfx_TransparentSprite_NoClip       IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
+;_logo_gfx_pal                       IMPORT    490   variable
+;_gfx_SetPalette                     IMPORT  -----   function
+;_gfx_Begin                          IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	XREF _logo_gfx_pal:ROM
+	XREF _ubuntu_data:ROM
+	XREF _gfx_TransparentSprite_NoClip:ROM
+	XREF _gfx_FillScreen:ROM
+	XREF _gfx_SetPalette:ROM
+	XREF _gfx_End:ROM
+	XREF _gfx_Begin:ROM
+	XREF _os_GetCSC:ROM
+	XREF _prgm_CleanUp:ROM
+	XDEF _main
+	END

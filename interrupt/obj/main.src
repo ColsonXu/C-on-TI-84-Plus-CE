@@ -1,0 +1,150 @@
+; Zilog eZ80 ANSI C Compiler Release 3.4
+; -nomodsect -optspeed -noreduceopt -peephole -globalopt
+; -localcse -const=ROM 
+	FILE	"..\SRC\MAIN.C"
+	.assume ADL=1
+	SEGMENT DATA
+_exit_loop:
+	DB	0
+;    1	#include <stdbool.h>
+;    2	#include <stddef.h>
+;    3	#include <stdint.h>
+;    4	#include <tice.h>
+;    5	#include <math.h>
+;    6	#include <stdio.h>
+;    7	#include <stdlib.h>
+;    8	#include <string.h>
+;    9	#include <intce.h>
+;   10	
+;   11	
+;   12	void interrupt isr_on(void);
+;   13	bool exit_loop = false;
+	SEGMENT CODE
+;   14	
+;   15	
+;   16	void main(void) {
+_main:
+;   17	
+;   18	    prgm_CleanUp();
+	CALL	_prgm_CleanUp
+;   19	    os_SetCursorPos( 0, 0 );
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	CALL	_os_SetCursorPos
+	POP	BC
+	POP	BC
+;   20	    os_PutStrFull("PRESS ON, YOU MUTHERFUCKER!!!");
+	LD	BC,L__0
+	PUSH	BC
+	CALL	_os_PutStrFull
+	POP	BC
+;   21	
+;   22	    int_Initialize();
+	CALL	_int_Initialize
+;   23	
+;   24	    int_SetVector(ON_IVECT, isr_on);
+	LD	BC,_isr_on
+	PUSH	BC
+	LD	BC,0
+	PUSH	BC
+	CALL	_int_SetVector
+	POP	BC
+	POP	BC
+;   25	
+;   26	    int_EnableConfig = INT_ON;
+	LD	BC,1
+	LD	(15728644),BC
+;   27	
+;   28	    int_Enable();
+ei
+;   29	
+;   30	    while( !exit_loop );
+L_1:
+	LD	A,(_exit_loop)
+	OR	A,A
+	JR	Z,L_1
+;   31	
+;   32	    os_SetCursorPos( 0, 0 );
+	LD	BC,0
+	PUSH	BC
+	PUSH	BC
+	CALL	_os_SetCursorPos
+	POP	BC
+	POP	BC
+;   33	    os_PutStrFull("PRESS ON, YOU MUTHERFUCKER!!!");
+	LD	BC,L__2
+	PUSH	BC
+	CALL	_os_PutStrFull
+	POP	BC
+;   34	
+;   35	    int_Reset();
+	CALL	_int_Reset
+;   36	    prgm_CleanUp();
+	CALL	_prgm_CleanUp
+;   37	}
+	RET	
+
+
+;**************************** _main ***************************
+;Name                         Addr/Register   Size   Type
+;_int_Reset                          IMPORT  -----   function
+;_exit_loop                          STATIC      1   variable
+;_isr_on                             IMPORT  -----   function
+;_int_SetVector                      IMPORT  -----   function
+;_int_Initialize                     IMPORT  -----   function
+;_os_PutStrFull                      IMPORT  -----   function
+;_os_SetCursorPos                    IMPORT  -----   function
+;_prgm_CleanUp                       IMPORT  -----   function
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	SEGMENT STRSECT
+L__0:
+	DB	"PRESS ON, YOU MUTHERFUCKER!!!"
+	DB	0
+L__2:
+	DB	"PRESS ON, YOU MUTHERFUCKER!!!"
+	DB	0
+	SEGMENT CODE
+;   38	
+;   39	void interrupt isr_on(void) {
+_isr_on:
+	PUSH	IY
+	EXX	
+	EX	AF,AF'
+;   40	    exit_loop = true;
+	LD	A,1
+	LD	(_exit_loop),A
+;   41	    int_Acknowledge = INT_ON;
+	LD	BC,1
+	LD	(15728648),BC
+	EXX	
+	EX	AF,AF'
+	POP	IY
+	EI	
+	RETI	
+
+
+;**************************** _isr_on ***************************
+;Name                         Addr/Register   Size   Type
+;_exit_loop                          STATIC      1   variable
+
+
+; Stack Frame Size: 6 (bytes)
+;       Spill Code: 0 (instruction)
+
+
+	XREF _int_SetVector:ROM
+	XREF _int_Reset:ROM
+	XREF _int_Initialize:ROM
+	XREF _os_PutStrFull:ROM
+	XREF _os_SetCursorPos:ROM
+	XREF _prgm_CleanUp:ROM
+	XDEF _isr_on
+	XDEF _main
+	XDEF _exit_loop
+	END
